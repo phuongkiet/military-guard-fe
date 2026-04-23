@@ -9,7 +9,7 @@ import Label from "../../components/form/Label";
 import Select, { type Option } from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import { Modal } from "../../components/ui/modal";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
 import type { Militia } from "../../types/militia";
 import { useModal } from "../../hooks/useModal";

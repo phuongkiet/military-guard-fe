@@ -5,7 +5,7 @@ import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Select, { type Option } from "../../components/form/Select";

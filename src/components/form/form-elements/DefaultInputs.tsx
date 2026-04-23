@@ -3,7 +3,7 @@ import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
 import Select from "../Select";
-import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
+import { EyeCloseIcon, EyeIcon, TimeIcon } from "../../../assets/icons/index.ts";
 import DatePicker from "../date-picker.tsx";
 
 export default function DefaultInputs() {

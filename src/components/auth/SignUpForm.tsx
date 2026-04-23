@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../assets/icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
-import { authService } from "../../services/authService";
 import type { ApiError } from "../../api/agent";
+import { authService } from "../../features/auth/services/authService";
 
 export default function SignUpForm() {
   const navigate = useNavigate();

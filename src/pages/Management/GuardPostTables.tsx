@@ -8,7 +8,7 @@ import ManagementTable from "../../components/tables/ManagementTable";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import { Modal } from "../../components/ui/modal";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
 import type { GuardPost } from "../../types/guardPost";
 import { useModal } from "../../hooks/useModal";

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
 import Label from "./Label";
-import { CalenderIcon } from "../../icons";
+import { CalenderIcon } from "../../assets/icons";
 type Hook = flatpickr.Options.Hook;
 type DateOption = flatpickr.Options.DateOption;
 

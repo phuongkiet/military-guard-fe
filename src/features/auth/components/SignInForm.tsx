@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../assets/icons";
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
+import { authService } from "../../services/authService";
 import { useStore } from "../../stores/RootStore";
 import type { ApiError } from "../../api/agent";
-import { authService } from "../../features/auth/services/authService";
 
 export default function SignInForm() {
   const navigate = useNavigate();

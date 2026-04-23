@@ -6,7 +6,7 @@ import {
   HorizontaLDots,
   MailIcon,
   TaskIcon,
-} from "../icons";
+} from "../assets/icons";
 import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {

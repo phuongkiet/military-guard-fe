@@ -7,7 +7,7 @@ import {
   HorizontaLDots,
   TableIcon,
   UserIcon,
-} from "../icons";
+} from "../assets/icons";
 import { useSidebar } from "../context/SidebarContext";
 
 type NavItem = {

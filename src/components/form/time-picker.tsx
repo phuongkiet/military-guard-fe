@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import flatpickr from "flatpickr";
 import type { Instance as FlatpickrInstance } from "flatpickr/dist/types/instance";
-import { TimeIcon } from "../../icons";
+import { TimeIcon } from "../../assets/icons";
 
 type TimePickerProps = {
   id: string;

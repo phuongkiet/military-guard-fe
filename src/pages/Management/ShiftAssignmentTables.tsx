@@ -5,15 +5,15 @@ import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import Label from "../../components/form/Label";
 import Select, { type Option } from "../../components/form/Select";
 import DatePicker from "../../components/form/date-picker";
 import { Modal } from "../../components/ui/modal";
 import { useModal } from "../../hooks/useModal";
 import { useStore } from "../../stores/RootStore";
-import type { ShiftAssignment } from "../../types/shiftAssignment";
 import { translateMilitiaRankToVi } from "../../utils/enumTranslations";
+import type { ShiftAssignment } from "../../features/shift-assignment/types/shiftAssignment";
 
 const formatDate = (value: string) => {
   const date = new Date(value);

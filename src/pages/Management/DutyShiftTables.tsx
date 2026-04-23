@@ -9,10 +9,10 @@ import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
 import TimePicker from "../../components/form/time-picker";
 import { Modal } from "../../components/ui/modal";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
-import type { DutyShift } from "../../types/dutyShift";
 import { useModal } from "../../hooks/useModal";
+import type { DutyShift } from "../../features/duty-shift/types/dutyShift";
 
 const formatTime = (value: string) => value.slice(0, 5);
 const isValidTimeFormat = (value: string) => /^([01]\d|2[0-3]):[0-5]\d$/.test(value);

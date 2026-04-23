@@ -5,7 +5,7 @@ import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
-import { EyeIcon, TrashBinIcon } from "../../icons";
+import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
 import type { LeaveRequest } from "../../types/leaveRequest";
 

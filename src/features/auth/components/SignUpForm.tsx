@@ -1,43 +1,38 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../assets/icons";
+import { Link, useNavigate } from "react-router";
+import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
-import Button from "../ui/button/Button";
-import { useStore } from "../../stores/RootStore";
+import { authService } from "../../services/authService";
 import type { ApiError } from "../../api/agent";
-import { authService } from "../../features/auth/services/authService";
 
-export default function SignInForm() {
+export default function SignUpForm() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { authStore } = useStore();
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"Admin" | "Militia">("Militia");
+  const [militiaId, setMilitiaId] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const locationState = location.state as
-    | { from?: string; registered?: boolean; message?: string }
-    | null;
-
-  const redirectPath = (() => {
-    const state = locationState;
-    return state?.from && state.from !== "/signin" ? state.from : "/";
-  })();
-
-  const registrationMessage = locationState?.registered
-    ? locationState.message || "Sign up successful. Please sign in."
-    : "";
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password.");
+      setError("Please fill in username and password.");
+      return;
+    }
+
+    if (role === "Militia" && !militiaId.trim()) {
+      setError("Please enter Militia ID for militia account.");
+      return;
+    }
+
+    if (!isChecked) {
+      setError("Please accept Terms and Privacy Policy.");
       return;
     }
 
@@ -45,38 +40,28 @@ export default function SignInForm() {
     setError("");
 
     try {
-      const response = await authService.signIn({
+      const response = await authService.signUp({
         username: username.trim(),
         password,
+        role,
+        militiaId: role === "Admin" ? null : militiaId.trim(),
       });
 
-      authStore.login(
-        {
-          username: response.username,
-          role: response.role,
-          militiaId: response.militiaId ?? null,
-        },
-        response.token,
-      );
-      const destinationPath =
-        response.role === "Militia"
-          ? "/militia"
-          : redirectPath === "/militia" || redirectPath.startsWith("/militia/")
-            ? "/"
-            : redirectPath;
-
-      navigate(destinationPath, { replace: true });
+      navigate("/signin", {
+        replace: true,
+        state: { registered: true, message: response.message },
+      });
     } catch (requestError) {
       const apiError = requestError as ApiError;
-      setError(apiError.message || "Sign in failed. Please try again.");
+      setError(apiError.message || "Sign up failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col flex-1">
-      <div className="w-full max-w-md pt-10 mx-auto">
+    <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
+      <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
         <Link
           to="/"
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
@@ -89,10 +74,10 @@ export default function SignInForm() {
         <div>
           <div className="mb-5 sm:mb-8">
             <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Sign In
+              Sign Up
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Enter your email and password to sign in!
+              Enter your email and password to sign up!
             </p>
           </div>
           <div>
@@ -122,7 +107,7 @@ export default function SignInForm() {
                     fill="#EB4335"
                   />
                 </svg>
-                Sign in with Google
+                Sign up with Google
               </button>
               <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-normal text-gray-700 transition-colors bg-gray-100 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10">
                 <svg
@@ -135,7 +120,7 @@ export default function SignInForm() {
                 >
                   <path d="M15.6705 1.875H18.4272L12.4047 8.75833L19.4897 18.125H13.9422L9.59717 12.4442L4.62554 18.125H1.86721L8.30887 10.7625L1.51221 1.875H7.20054L11.128 7.0675L15.6705 1.875ZM14.703 16.475H16.2305L6.37054 3.43833H4.73137L14.703 16.475Z" />
                 </svg>
-                Sign in with X
+                Sign up with X
               </button>
             </div>
             <div className="relative py-3 sm:py-5">
@@ -149,29 +134,59 @@ export default function SignInForm() {
               </div>
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                <div>
-                  <Label>
-                    Username <span className="text-error-500">*</span>{" "}
-                  </Label>
-                  <Input
-                    type="text"
-                    id="username"
-                    name="username"
-                    placeholder="Enter your username"
-                    value={username}
-                    onChange={(event) => setUsername(event.target.value)}
-                    disabled={isSubmitting}
-                  />
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <Label>
+                      Username<span className="text-error-500">*</span>
+                    </Label>
+                    <Input
+                      type="text"
+                      id="username"
+                      name="username"
+                      placeholder="Enter your username"
+                      value={username}
+                      onChange={(event) => setUsername(event.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
                 <div>
+                  <Label>Role<span className="text-error-500">*</span></Label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value as "Admin" | "Militia")}
+                    disabled={isSubmitting}
+                    className="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+                  >
+                    <option value="Militia">Militia</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+                {role === "Militia" ? (
+                  <div>
+                    <Label>Militia ID<span className="text-error-500">*</span></Label>
+                    <Input
+                      type="text"
+                      id="militiaId"
+                      name="militiaId"
+                      placeholder="Enter militia profile ID"
+                      value={militiaId}
+                      onChange={(event) => setMilitiaId(event.target.value)}
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                ) : null}
+                <div>
                   <Label>
-                    Password <span className="text-error-500">*</span>{" "}
+                    Password<span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
                     <Input
-                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      type={showPassword ? "text" : "password"}
                       id="password"
                       name="password"
                       value={password}
@@ -190,50 +205,51 @@ export default function SignInForm() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      checked={isChecked}
-                      onChange={setIsChecked}
-                      disabled={isSubmitting}
-                    />
-                    <span className="block font-normal text-gray-700 text-theme-sm dark:text-gray-400">
-                      Keep me logged in
+                {/* <!-- Checkbox --> */}
+                <div className="flex items-center gap-3">
+                  <Checkbox
+                    className="w-5 h-5"
+                    checked={isChecked}
+                    onChange={setIsChecked}
+                    disabled={isSubmitting}
+                  />
+                  <p className="inline-block font-normal text-gray-500 dark:text-gray-400">
+                    By creating an account means you agree to the{" "}
+                    <span className="text-gray-800 dark:text-white/90">
+                      Terms and Conditions,
+                    </span>{" "}
+                    and our{" "}
+                    <span className="text-gray-800 dark:text-white">
+                      Privacy Policy
                     </span>
-                  </div>
-                  <Link
-                    to="/reset-password"
-                    className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >
-                    Forgot password?
-                  </Link>
+                  </p>
                 </div>
                 {error ? (
                   <p className="text-sm text-error-500" role="alert">
                     {error}
                   </p>
                 ) : null}
-                {registrationMessage ? (
-                  <p className="text-sm text-success-500" role="status">
-                    {registrationMessage}
-                  </p>
-                ) : null}
+                {/* <!-- Button --> */}
                 <div>
-                  <Button className="w-full" size="sm" disabled={isSubmitting}>
-                    {isSubmitting ? "Signing in..." : "Sign in"}
-                  </Button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isSubmitting ? "Signing up..." : "Sign Up"}
+                  </button>
                 </div>
               </div>
             </form>
 
             <div className="mt-5">
               <p className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                Don&apos;t have an account? {""}
+                Already have an account? {""}
                 <Link
-                  to="/signup"
+                  to="/signin"
                   className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
                 >
-                  Sign Up
+                  Sign In
                 </Link>
               </p>
             </div>
