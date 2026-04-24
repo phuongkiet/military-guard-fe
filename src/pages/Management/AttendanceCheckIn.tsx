@@ -1,4 +1,4 @@
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import Badge from "../../components/ui/badge/Badge";
 import ComponentCard from "../../components/common/ComponentCard";
@@ -6,21 +6,28 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
 import { useStore } from "../../stores/RootStore";
-import { AttendanceStatus, type Attendance } from "../../types/attendance";
+import { AttendanceStatus, type IAttendance } from "../../features/attendance/types/attendance";
+import { useNavigate } from "react-router";
 
 const statusLabelMap: Record<AttendanceStatus, string> = {
   [AttendanceStatus.OnTime]: "Đúng giờ",
   [AttendanceStatus.LateWarning]: "Cảnh báo trễ",
   [AttendanceStatus.PenaltyThreshold]: "Vượt ngưỡng xử phạt",
+  [AttendanceStatus.Absent]: "Vắng mặt",
 };
 
 const statusColorMap: Record<AttendanceStatus, "success" | "warning" | "error"> = {
   [AttendanceStatus.OnTime]: "success",
   [AttendanceStatus.LateWarning]: "warning",
   [AttendanceStatus.PenaltyThreshold]: "error",
+  [AttendanceStatus.Absent]: "error",
 };
 
-const formatDateTime = (value: string) => {
+const formatDateTime = (value?: string) => {
+  if (!value) {
+    return "-";
+  }
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
@@ -36,10 +43,21 @@ function AttendanceCheckIn() {
   const { attendanceStore } = useStore();
   const [militiaId, setMilitiaId] = useState("");
   const [shiftId, setShiftId] = useState("");
+  const [guardPostId, setGuardPostId] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!shiftId) {
+      console.error("Không tìm thấy ID ca trực trong URL!");
+      navigate("/management/duty-shifts");
+      return;
+    }
+
+  }, [shiftId, navigate]);
 
   const isSubmitDisabled = useMemo(() => {
-    return attendanceStore.isLoading || !militiaId.trim() || !shiftId.trim();
-  }, [attendanceStore.isLoading, militiaId, shiftId]);
+    return attendanceStore.isLoading || !militiaId.trim() || !shiftId.trim() || !guardPostId.trim();
+  }, [attendanceStore.isLoading, militiaId, shiftId, guardPostId]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -49,9 +67,11 @@ function AttendanceCheckIn() {
       await attendanceStore.checkIn({
         militiaId: militiaId.trim(),
         shiftId: shiftId.trim(),
+        guardPostId: guardPostId.trim(),
       });
       setMilitiaId("");
       setShiftId("");
+      setGuardPostId("");
     } catch {
       // Error state already handled in store
     }
@@ -97,6 +117,19 @@ function AttendanceCheckIn() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300" htmlFor="guard-post-id">
+                Guard Post ID
+              </label>
+              <input
+                id="guard-post-id"
+                value={guardPostId}
+                onChange={(event) => setGuardPostId(event.target.value)}
+                placeholder="VD: c9g8ff91-46ec-5cc9-9c25-89105c864659"
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition focus:border-brand-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+              />
+            </div>
+
             <div className="md:col-span-2">
               <button
                 type="submit"
@@ -133,7 +166,7 @@ function AttendanceCheckIn() {
         >
           <ManagementTable
             rows={attendanceStore.recentCheckIns}
-            rowKey={(row: Attendance, index) => `${row.militiaId}-${row.shiftId}-${index}`}
+            rowKey={(row: IAttendance, index) => `${row.militiaId}-${row.shiftId}-${index}`}
             emptyMessage="Chưa có lượt điểm danh nào trong phiên hiện tại."
             pagination={{
               mode: "client",

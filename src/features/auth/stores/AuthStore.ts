@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { getAccessToken, setAccessToken } from "../api/agent";
+import { getAccessToken, setAccessToken } from "../../../api/agent";
 import type { AuthUser } from "../types/auth";
 
 const AUTH_USER_KEY = "authUser";

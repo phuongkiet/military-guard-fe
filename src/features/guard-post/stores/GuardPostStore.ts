@@ -6,7 +6,7 @@ import type {
   GuardPostCreateDTO,
   GuardPostUpdateDTO,
 } from "../types/guardPost";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class GuardPostStore {
   list: GuardPost[] = [];

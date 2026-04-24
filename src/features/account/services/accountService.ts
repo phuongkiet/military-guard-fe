@@ -1,9 +1,9 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   AccountResponse,
   CreateAccountDTO,
   GetAllAccountsQuery,
-  PaginatedList,
   UpdateAccountCommand,
   UpdateAccountDTO,
 } from "../types/account";

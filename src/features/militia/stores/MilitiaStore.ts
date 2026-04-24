@@ -6,7 +6,7 @@ import type {
   MilitiaCreateDTO,
   MilitiaUpdateDTO,
 } from "../types/militia";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class MilitiaStore {
   list: Militia[] = [];

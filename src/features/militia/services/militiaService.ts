@@ -1,11 +1,11 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   GetAllMilitiasQuery,
   MilitiaCreateDTO,
   MilitiaResponse,
   MilitiaUpdateCommand,
   MilitiaUpdateDTO,
-  PaginatedList,
 } from "../types/militia";
 
 const endpoints = {

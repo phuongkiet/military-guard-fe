@@ -2,6 +2,7 @@ export const AttendanceStatus = {
   OnTime: 1,
   LateWarning: 2,
   PenaltyThreshold: 3,
+  Absent: 4,
 } as const;
 
 export type AttendanceStatus =
@@ -10,9 +11,11 @@ export type AttendanceStatus =
 export type CheckInCommand = {
   militiaId: string;
   shiftId: string;
+  guardPostId: string;
 };
 
 export type AttendanceResponse = {
+  id: string;
   status: AttendanceStatus | keyof typeof AttendanceStatus | number | string;
 };
 
@@ -21,10 +24,15 @@ export type CheckInApiResponse = {
   data: AttendanceResponse;
 };
 
-export type Attendance = {
-  militiaId: string;
-  shiftId: string;
-  checkInTime: string;
-  status: AttendanceStatus;
-  note?: string | null;
-};
+export interface IAttendance {
+    militiaId: string;
+    shiftId: string;
+    guardPostId?: string;
+    status: AttendanceStatus;
+    checkInTime?: string;
+    note?: string;
+    
+    fullName?: string;
+    guardPostName?: string;
+    dutyShiftName?: string;
+}

@@ -1,11 +1,11 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   GetAllDutyShiftsQuery,
   DutyShiftResponse,
   DutyShiftCreateDTO,
   DutyShiftUpdateCommand,
   DutyShiftUpdateDTO,
-  PaginatedList,
 } from "../types/dutyShift";
 
 const endpoints = {

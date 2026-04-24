@@ -1,10 +1,10 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   GetPagedLeaveRequestsQuery,
   LeaveRequestResponse,
   LeaveRequestCreateDTO,
   LeaveRequestUpdateDTO,
-  PaginatedList,
   ProcessLeaveRequestCommand,
 } from "../types/leaveRequest";
 

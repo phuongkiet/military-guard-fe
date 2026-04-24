@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../stores/RootStore";
+import { useStore } from "../../../stores/RootStore";
 
 export const RequireAuth = observer(() => {
   const { authStore } = useStore();

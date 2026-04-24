@@ -1,11 +1,11 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   GetAllGuardPostsQuery,
   GuardPostResponse,
   GuardPostCreateDTO,
   GuardPostUpdateCommand,
   GuardPostUpdateDTO,
-  PaginatedList,
 } from "../types/guardPost";
 
 const endpoints = {

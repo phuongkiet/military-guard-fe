@@ -32,7 +32,7 @@ const navItems: NavItem[] = [
       { name: "Quản lý ca trực", path: "/duty-shift-tables", pro: false },
       { name: "Quản lý phân chia ca", path: "/shift-assignment-tables", pro: false },
       { name: "Quản lý nghỉ phép", path: "/leave-request-tables", pro: false },
-      { name: "Điểm danh", path: "/attendance-checkin", pro: false },
+      { name: "Điểm danh", path: "/attendance-live", pro: false },
     ],
   },
   {

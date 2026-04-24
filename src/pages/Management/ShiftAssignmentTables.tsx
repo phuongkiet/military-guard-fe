@@ -61,7 +61,7 @@ function ShiftAssignmentTables() {
   const guardPostOptions = useMemo<Option[]>(() => {
     const sourceRows = filterSourceRows.length > 0 ? filterSourceRows : rows;
     const unique = new Map<string, string>();
-    sourceRows.forEach((row) => {
+    sourceRows.forEach((row: ShiftAssignment) => {
       if (!unique.has(row.guardPostId)) {
         unique.set(row.guardPostId, row.guardPostName);
       }
@@ -72,7 +72,7 @@ function ShiftAssignmentTables() {
   const militiaOptions = useMemo<Option[]>(() => {
     const sourceRows = filterSourceRows.length > 0 ? filterSourceRows : rows;
     const unique = new Map<string, string>();
-    sourceRows.forEach((row) => {
+    sourceRows.forEach((row: ShiftAssignment) => {
       if (!unique.has(row.militiaId)) {
         unique.set(row.militiaId, row.militiaName);
       }

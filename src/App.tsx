@@ -12,12 +12,13 @@ import ShiftAssignmentTables from "./pages/Management/ShiftAssignmentTables";
 import LeaveRequestTables from "./pages/Management/LeaveRequestTables";
 import AccountTables from "./pages/Management/AccountTables";
 import AttendanceCheckIn from "./pages/Management/AttendanceCheckIn";
-import { GuestOnly, RequireAuth, RequireRole } from "./features/auth/AuthGuards";
+import { GuestOnly, RequireAuth, RequireRole } from "./features/auth/components/AuthGuards";
 import MilitiaLayout from "./layouts/MilitiaLayout";
 import MilitiaHome from "./pages/Militia/MilitiaHome";
 import MilitiaAssignments from "./pages/Militia/MilitiaAssignments";
 import MilitiaLeaveRequests from "./pages/Militia/MilitiaLeaveRequests";
 import UserProfiles from "./pages/UserProfiles";
+import AttendanceLiveDashboard from "./pages/Management/AttendanceLiveDashboard";
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
                   element={<LeaveRequestTables />}
                 />
                 <Route path="/attendance-checkin" element={<AttendanceCheckIn />} />
+                <Route path="/attendance-live/:shiftId" element={<AttendanceLiveDashboard />} />
                 <Route path="/account-tables" element={<AccountTables />} />
                 <Route path="/profile" element={<UserProfiles />} />
               </Route>

@@ -7,7 +7,7 @@ import type {
   LeaveStatus,
   LeaveRequestUpdateDTO,
 } from "../types/leaveRequest";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class LeaveRequestStore {
   list: LeaveRequest[] = [];

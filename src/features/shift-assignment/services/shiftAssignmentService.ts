@@ -1,11 +1,11 @@
-import { requests } from "../api/agent";
+import { requests } from "../../../api/agent";
+import type { PaginatedList } from "../../../types/common";
 import type {
   GetAllShiftAssignmentsQuery,
   ShiftAssignmentCreateDTO,
   ShiftAssignmentResponse,
   ShiftAssignmentUpdateCommand,
   ShiftAssignmentUpdateDTO,
-  PaginatedList,
 } from "../types/shiftAssignment";
 
 const endpoints = {

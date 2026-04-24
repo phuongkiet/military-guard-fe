@@ -6,7 +6,7 @@ import type {
   DutyShiftUpdateDTO,
   GetAllDutyShiftsQuery,
 } from "../types/dutyShift";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class DutyShiftStore {
   list: DutyShift[] = [];

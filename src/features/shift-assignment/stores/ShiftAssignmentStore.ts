@@ -6,7 +6,7 @@ import type {
   ShiftAssignmentCreateDTO,
   ShiftAssignmentUpdateDTO,
 } from "../types/shiftAssignment";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class ShiftAssignmentStore {
   list: ShiftAssignment[] = [];

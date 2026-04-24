@@ -6,7 +6,7 @@ import type {
   GetAllAccountsQuery,
   UpdateAccountDTO,
 } from "../types/account";
-import type { ApiError } from "../api/agent";
+import type { ApiError } from "../../../api/agent";
 
 export class AccountStore {
   list: Account[] = [];
