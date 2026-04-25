@@ -1,4 +1,4 @@
-export type GuardPost = {
+export type IGuardPost = {
   id: string;
   name: string;
   location: string;
@@ -7,7 +7,7 @@ export type GuardPost = {
   isActive: boolean;
 };
 
-export type GuardPostResponse = GuardPost;
+export type GuardPostResponse = IGuardPost;
 
 export type GuardPostCreateDTO = {
   name: string;

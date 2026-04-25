@@ -7,7 +7,7 @@ import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
 import { EyeIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
-import type { LeaveRequest } from "../../types/leaveRequest";
+import type { LeaveRequest } from "../../features/leave-request/types/leaveRequest";
 
 const formatDate = (value: string) => {
   const date = new Date(value);

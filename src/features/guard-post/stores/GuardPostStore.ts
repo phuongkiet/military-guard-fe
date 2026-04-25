@@ -2,15 +2,15 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { guardPostService } from "../services/guardPostService";
 import type {
   GetAllGuardPostsQuery,
-  GuardPost,
   GuardPostCreateDTO,
-  GuardPostUpdateDTO,
+  GuardPostUpdateCommand,
+  IGuardPost,
 } from "../types/guardPost";
 import type { ApiError } from "../../../api/agent";
 
 export class GuardPostStore {
-  list: GuardPost[] = [];
-  detail: GuardPost | null = null;
+  list: IGuardPost[] = [];
+  detail: IGuardPost | null = null;
   pageIndex: number = 1;
   pageSize: number = 10;
   totalCount: number = 0;
@@ -19,9 +19,21 @@ export class GuardPostStore {
   hasNextPage: boolean = false;
   isLoading: boolean = false;
   error: string | null = null;
+  selectedGuardPost: IGuardPost | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  selectGuardPost = (id: string) => {
+    const post = this.list.find(p => p.id === id);
+    console.log("Selected Guard Post:", post);
+    if (post) this.selectedGuardPost = post;
+  }
+
+  // Hàm clear selected item khi đóng Modal
+  clearSelectedGuardPost = () => {
+    this.selectedGuardPost = null;
   }
 
   async fetchList(query?: GetAllGuardPostsQuery) {
@@ -90,23 +102,22 @@ export class GuardPostStore {
     }
   }
 
-  async update(id: string, payload: GuardPostUpdateDTO) {
+  updateGuardPost = async (id: string, payload: GuardPostUpdateCommand) => {
     this.isLoading = true;
-    this.error = null;
     try {
       await guardPostService.update(id, payload);
-      await this.fetchDetail(id);
-      await this.fetchList({ pageIndex: this.pageIndex, pageSize: this.pageSize });
-    } catch (err) {
-      const apiError = err as ApiError;
+      
       runInAction(() => {
-        this.error = apiError.message || "Failed to update guard post";
-      });
-      throw err;
-    } finally {
-      runInAction(() => {
+        const index = this.list.findIndex(p => p.id === id);
+        if (index !== -1) {
+          this.list[index] = { ...this.list[index], ...payload };
+        }
         this.isLoading = false;
       });
+    } catch (error) {
+      console.error(error);
+      runInAction(() => { this.isLoading = false; });
+      throw error;
     }
   }
 

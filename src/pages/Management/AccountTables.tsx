@@ -12,7 +12,7 @@ import Select, { type Option } from "../../components/form/Select";
 import { Modal } from "../../components/ui/modal";
 import { useModal } from "../../hooks/useModal";
 import { useStore } from "../../stores/RootStore";
-import type { Account } from "../../types/account";
+import type { Account } from "../../features/account/types/account";
 import { translateRoleToVi } from "../../utils/enumTranslations";
 
 const renderBanStatus = (isBanned?: boolean) => (

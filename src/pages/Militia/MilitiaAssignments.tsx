@@ -6,7 +6,8 @@ import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
 import { useStore } from "../../stores/RootStore";
-import type { ShiftAssignment } from "../../types/shiftAssignment";
+import type { ShiftAssignment } from "../../features/shift-assignment/types/shiftAssignment";
+import type { CheckInCommand } from "../../features/attendance/types/attendance";
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -36,15 +37,21 @@ function MilitiaAssignments() {
     ? "Đang tải dữ liệu phân công..."
     : shiftAssignmentStore.error ?? "Chưa có ca nào được phân công cho bạn.";
 
-  const handleCheckIn = async (shiftId: string) => {
-    if (!militiaId || !shiftId) {
+  const handleCheckIn = async (assignment: ShiftAssignment) => {
+    if (!militiaId) {
       return;
     }
 
     attendanceStore.clearMessages();
 
+    const payload: CheckInCommand = {
+      militiaId,
+      shiftId: assignment.dutyShiftId,
+      guardPostId: assignment.guardPostId,
+    };
+
     try {
-      await attendanceStore.checkIn({ militiaId, shiftId });
+      await attendanceStore.checkIn(payload);
     } catch {
       // Store already exposes error message.
     }
@@ -162,7 +169,7 @@ function MilitiaAssignments() {
                       <button
                         type="button"
                         onClick={() => {
-                          void handleCheckIn(row.dutyShiftId);
+                          void handleCheckIn(row);
                         }}
                         disabled={attendanceStore.isLoading}
                         className="inline-flex h-9 items-center justify-center rounded-lg bg-brand-500 px-3 text-xs font-semibold text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"

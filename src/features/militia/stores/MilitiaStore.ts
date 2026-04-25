@@ -19,16 +19,34 @@ export class MilitiaStore {
   hasNextPage: boolean = false;
   isLoading: boolean = false;
   error: string | null = null;
+  selectedMilitia: Militia | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
+  // Set selected item để bắn vào Modal
+  selectMilitia = (id: string) => {
+    const militia = this.list.find((m) => m.id === id);
+    if (militia) this.selectedMilitia = militia;
+  };
+
+  clearSelectedMilitia = () => {
+    this.selectedMilitia = null;
+  };
+
   async fetchList(query?: GetAllMilitiasQuery) {
     this.isLoading = true;
     this.error = null;
     try {
-      const data = await militiaService.list(query);
+      // Ưu tiên dùng query truyền vào, nếu không có thì lấy state hiện tại
+      const currentQuery = query || {
+        pageIndex: this.pageIndex,
+        pageSize: this.pageSize,
+      };
+      
+      const data = await militiaService.list(currentQuery);
+      
       runInAction(() => {
         this.list = data.items;
         this.pageIndex = data.pageIndex;
@@ -41,12 +59,10 @@ export class MilitiaStore {
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to fetch militia list";
+        this.error = apiError.message || "Không thể tải danh sách dân quân.";
       });
     } finally {
-      runInAction(() => {
-        this.isLoading = false;
-      });
+      runInAction(() => { this.isLoading = false; });
     }
   }
 

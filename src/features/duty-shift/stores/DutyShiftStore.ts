@@ -19,9 +19,21 @@ export class DutyShiftStore {
   hasNextPage: boolean = false;
   isLoading: boolean = false;
   error: string | null = null;
+  selectedDutyShift: DutyShift | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  selectDutyShift = (id: string) => {
+    const shift = this.list.find(s => s.id === id);
+    console.log("Selected Duty Shift:", shift);
+    if (shift) this.selectedDutyShift = shift;
+  }
+
+  // Hàm clear selected item khi đóng Modal
+  clearSelectedDutyShift = () => {
+    this.selectedDutyShift = null;
   }
 
   async fetchList(query?: GetAllDutyShiftsQuery) {
