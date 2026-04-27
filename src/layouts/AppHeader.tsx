@@ -6,6 +6,8 @@ import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 import { useStore } from "../stores/RootStore";
+import CurrentShiftWidget from "../features/duty-shift/components/CurrentShiftWidget";
+import { observer } from "mobx-react-lite";
 
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -174,5 +176,5 @@ const AppHeader: React.FC = () => {
   );
 };
 
-export default AppHeader;
+export default observer(AppHeader);
 

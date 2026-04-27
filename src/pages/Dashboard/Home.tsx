@@ -1,12 +1,14 @@
 ﻿import { Link } from "react-router";
 import ComponentCard from "../../components/common/ComponentCard";
 import PageMeta from "../../components/common/PageMeta";
+import CurrentShiftWidget from "../../features/duty-shift/components/CurrentShiftWidget";
 
 export default function Home() {
   const modules = [
     {
       title: "Quản lý dân quân",
-      description: "Theo dõi danh sách lực lượng, đơn vị và trạng thái hiện tại.",
+      description:
+        "Theo dõi danh sách lực lượng, đơn vị và trạng thái hiện tại.",
       path: "/militia-tables",
     },
     {
@@ -31,12 +33,14 @@ export default function Home() {
     },
     {
       title: "Điểm danh",
-      description: "Thực hiện check-in theo militia và ca trực để nhận trạng thái đúng giờ/trễ ngay lập tức.",
+      description:
+        "Thực hiện check-in theo militia và ca trực để nhận trạng thái đúng giờ/trễ ngay lập tức.",
       path: "/attendance-checkin",
     },
     {
       title: "Quản lý tài khoản",
-      description: "Theo dõi tài khoản đăng nhập, vai trò và trạng thái khóa/mở khóa.",
+      description:
+        "Theo dõi tài khoản đăng nhập, vai trò và trạng thái khóa/mở khóa.",
       path: "/account-tables",
     },
   ];
@@ -48,9 +52,8 @@ export default function Home() {
         description="Trang tổng quan cho hệ thống quản lý lực lượng và ca trực."
       />
       <div className="space-y-6">
-        <ComponentCard
-          title="Tổng quan nghiệp vụ"
-        >
+        <CurrentShiftWidget />
+        <ComponentCard title="Tổng quan nghiệp vụ">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {modules.map((module) => (
               <Link
@@ -75,4 +78,3 @@ export default function Home() {
     </>
   );
 }
-

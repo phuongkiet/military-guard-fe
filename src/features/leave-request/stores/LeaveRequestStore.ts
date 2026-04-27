@@ -20,9 +20,21 @@ export class LeaveRequestStore {
   hasNextPage: boolean = false;
   isLoading: boolean = false;
   error: string | null = null;
+  selectedLeaveRequest: LeaveRequest | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  selectLeaveRequest = (id: string) => {
+    const request = this.list.find(r => r.id === id);
+    console.log("Selected Leave Request:", request);
+    if (request) this.selectedLeaveRequest = request;
+  }
+
+  // Hàm clear selected item khi đóng Modal
+  clearSelectedLeaveRequest = () => {
+    this.selectedLeaveRequest = null;
   }
 
   async fetchList(query?: GetPagedLeaveRequestsQuery) {
@@ -75,19 +87,17 @@ export class LeaveRequestStore {
     this.isLoading = true;
     this.error = null;
     try {
-      const leaveRequestId = await leaveRequestService.create(payload);
-      await this.fetchDetail(leaveRequestId);
-      return leaveRequestId;
+      await leaveRequestService.create(payload);
+      await this.fetchList({ pageIndex: 1, pageSize: this.pageSize });
+      
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to create leave request";
+        this.error = apiError.message || "Tạo đơn xin phép thất bại.";
       });
       throw err;
     } finally {
-      runInAction(() => {
-        this.isLoading = false;
-      });
+      runInAction(() => { this.isLoading = false; });
     }
   }
 
@@ -96,18 +106,18 @@ export class LeaveRequestStore {
     this.error = null;
     try {
       await leaveRequestService.update(id, payload);
-      await this.fetchDetail(id);
+      
+      // THIẾU DÒNG NÀY: Cập nhật xong thì load lại đúng trang hiện tại
       await this.fetchList({ pageIndex: this.pageIndex, pageSize: this.pageSize });
+      
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to update leave request";
+        this.error = apiError.message || "Cập nhật thất bại.";
       });
       throw err;
     } finally {
-      runInAction(() => {
-        this.isLoading = false;
-      });
+      runInAction(() => { this.isLoading = false; });
     }
   }
 
@@ -116,22 +126,21 @@ export class LeaveRequestStore {
     this.error = null;
     try {
       await leaveRequestService.delete(id);
+      
+      // THIẾU DÒNG NÀY: Xóa xong phải tính toán lại trang và load lại
+      let targetPage = this.pageIndex;
+      if (this.list.length === 1 && this.pageIndex > 1) {
+        targetPage -= 1; 
+      }
+      await this.fetchList({ pageIndex: targetPage, pageSize: this.pageSize });
+      
       runInAction(() => {
-        this.list = this.list.filter((item) => item.id !== id);
-        if (this.detail?.id === id) {
-          this.detail = null;
-        }
+        if (this.selectedLeaveRequest?.id === id) this.selectedLeaveRequest = null;
       });
     } catch (err) {
-      const apiError = err as ApiError;
-      runInAction(() => {
-        this.error = apiError.message || "Failed to delete leave request";
-      });
-      throw err;
+      // ...
     } finally {
-      runInAction(() => {
-        this.isLoading = false;
-      });
+      runInAction(() => { this.isLoading = false; });
     }
   }
 
@@ -141,14 +150,14 @@ export class LeaveRequestStore {
     try {
       await leaveRequestService.processStatus(id, {
         leaveRequestId: id,
-        newStatus: "approved",
+        newStatus: 1, // 1 là Literal Type cho Approved (Khớp 100% với DTO 1 | 2)
       });
       await this.fetchDetail(id);
       await this.fetchList({ pageIndex: this.pageIndex, pageSize: this.pageSize });
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to approve leave request";
+        this.error = apiError.message || "Lỗi khi duyệt đơn xin phép.";
       });
       throw err;
     } finally {
@@ -158,20 +167,20 @@ export class LeaveRequestStore {
     }
   }
 
-  async reject(id: string) {
+  async reject(id: string, _rejectedBy: string) {
     this.isLoading = true;
     this.error = null;
     try {
       await leaveRequestService.processStatus(id, {
         leaveRequestId: id,
-        newStatus: "rejected",
+        newStatus: 2, // 2 là Literal Type cho Rejected
       });
       await this.fetchDetail(id);
       await this.fetchList({ pageIndex: this.pageIndex, pageSize: this.pageSize });
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to reject leave request";
+        this.error = apiError.message || "Lỗi khi từ chối đơn xin phép.";
       });
       throw err;
     } finally {
@@ -185,7 +194,7 @@ export class LeaveRequestStore {
     this.error = null;
   }
 
-  async processStatus(id: string, newStatus: Exclude<LeaveStatus, "pending">) {
+  async processStatus(id: string, newStatus: Exclude<LeaveStatus, 0>) {
     this.isLoading = true;
     this.error = null;
     try {
@@ -198,7 +207,7 @@ export class LeaveRequestStore {
     } catch (err) {
       const apiError = err as ApiError;
       runInAction(() => {
-        this.error = apiError.message || "Failed to process leave request";
+        this.error = apiError.message || "Lỗi khi xử lý đơn xin phép.";
       });
       throw err;
     } finally {

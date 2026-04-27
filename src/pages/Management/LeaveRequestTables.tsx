@@ -5,9 +5,12 @@ import ComponentCard from "../../components/common/ComponentCard";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
 import ManagementTable from "../../components/tables/ManagementTable";
-import { EyeIcon, TrashBinIcon } from "../../assets/icons";
+import { CheckLineIcon, CloseIcon, PencilIcon, TrashBinIcon } from "../../assets/icons";
 import { useStore } from "../../stores/RootStore";
 import type { LeaveRequest } from "../../features/leave-request/types/leaveRequest";
+import { Modal } from "../../components/ui/modal";
+import { useModal } from "../../hooks/useModal";
+import LeaveRequestForm from "../../features/leave-request/components/LeaveRequestForm";
 
 const formatDate = (value: string) => {
   const date = new Date(value);
@@ -22,35 +25,72 @@ const renderStatus = (status: string) => {
   const normalized = status.toLowerCase();
 
   if (normalized === "approved") {
-    return <Badge size="sm" color="success">Đã duyệt</Badge>;
+    return (
+      <Badge size="sm" color="success">
+        Đã duyệt
+      </Badge>
+    );
   }
 
   if (normalized === "rejected") {
-    return <Badge size="sm" color="error">Từ chối</Badge>;
+    return (
+      <Badge size="sm" color="error">
+        Từ chối
+      </Badge>
+    );
   }
 
-  return <Badge size="sm" color="warning">Chờ duyệt</Badge>;
+  return (
+    <Badge size="sm" color="warning">
+      Chờ duyệt
+    </Badge>
+  );
 };
 
+
+
 function LeaveRequestTables() {
-  const { leaveRequestStore } = useStore();
+  const { leaveRequestStore, authStore } = useStore();
+  const { isOpen, openModal, closeModal } = useModal();
 
   useEffect(() => {
-    void leaveRequestStore.fetchList({ pageIndex: 1, pageSize: leaveRequestStore.pageSize });
+    void leaveRequestStore.fetchList({
+      pageIndex: 1,
+      pageSize: leaveRequestStore.pageSize,
+    });
   }, [leaveRequestStore]);
 
   const rows = leaveRequestStore.list;
   const emptyMessage = leaveRequestStore.isLoading
     ? "Đang tải dữ liệu nghỉ phép..."
-    : leaveRequestStore.error ?? "Chưa có đơn nghỉ phép nào để hiển thị.";
+    : (leaveRequestStore.error ?? "Chưa có đơn nghỉ phép nào để hiển thị.");
 
-  const handleViewDetail = async (id: string) => {
+  const handleApprove = async (id: string) => {
     leaveRequestStore.clearError();
     try {
-      await leaveRequestStore.fetchDetail(id);
+      await leaveRequestStore.approve(id, authStore.user?.username || "Không xác định");
     } catch {
       // Store exposes the error state.
     }
+  };
+
+  const handleReject = async (id: string) => {
+    leaveRequestStore.clearError();
+    try {
+      await leaveRequestStore.reject(id, authStore.user?.username || "Không xác định");
+    } catch {
+      // Store exposes the error state.
+    }
+  };
+
+  const handleEditClick = (id: string) => {
+    leaveRequestStore.selectLeaveRequest(id); // Set data cần update
+    openModal(); // Bật Modal lên
+  };
+
+  const handleCloseModal = () => {
+    leaveRequestStore.clearSelectedLeaveRequest(); // Xóa data
+    closeModal();
   };
 
   const handleDelete = async (id: string) => {
@@ -61,7 +101,10 @@ function LeaveRequestTables() {
     leaveRequestStore.clearError();
     try {
       await leaveRequestStore.delete(id);
-      void leaveRequestStore.fetchList({ pageIndex: leaveRequestStore.pageIndex, pageSize: leaveRequestStore.pageSize });
+      void leaveRequestStore.fetchList({
+        pageIndex: leaveRequestStore.pageIndex,
+        pageSize: leaveRequestStore.pageSize,
+      });
     } catch {
       // Store exposes the error state.
     }
@@ -74,7 +117,10 @@ function LeaveRequestTables() {
 
     leaveRequestStore.clearError();
     try {
-      await leaveRequestStore.fetchList({ pageIndex: nextPage, pageSize: leaveRequestStore.pageSize });
+      await leaveRequestStore.fetchList({
+        pageIndex: nextPage,
+        pageSize: leaveRequestStore.pageSize,
+      });
     } catch {
       // Store exposes the error state.
     }
@@ -83,7 +129,10 @@ function LeaveRequestTables() {
   const handlePageSizeChange = async (nextPageSize: number) => {
     leaveRequestStore.clearError();
     try {
-      await leaveRequestStore.fetchList({ pageIndex: 1, pageSize: nextPageSize });
+      await leaveRequestStore.fetchList({
+        pageIndex: 1,
+        pageSize: nextPageSize,
+      });
     } catch {
       // Store exposes the error state.
     }
@@ -99,6 +148,15 @@ function LeaveRequestTables() {
       <div className="space-y-6">
         <ComponentCard
           title="Danh sách nghỉ phép"
+          headerAction={
+            <button
+              type="button"
+              onClick={openModal}
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-semibold text-white transition hover:bg-brand-600"
+            >
+              Tạo đơn nghỉ phép
+            </button>
+          }
         >
           <ManagementTable
             rows={rows}
@@ -122,7 +180,8 @@ function LeaveRequestTables() {
               { header: "Người đề nghị", render: (row) => row.militiaName },
               {
                 header: "Thời gian nghỉ",
-                render: (row) => `${formatDate(row.startDate)} - ${formatDate(row.endDate)}`,
+                render: (row) =>
+                  `${formatDate(row.startDate)} - ${formatDate(row.endDate)}`,
               },
               { header: "Lý do", render: (row) => row.reason },
               {
@@ -141,14 +200,36 @@ function LeaveRequestTables() {
                   <div className="flex items-center justify-end gap-2">
                     <button
                       type="button"
-                      title="Chi tiết"
-                      aria-label="Chi tiết"
+                      title="Duyệt đơn"
+                      aria-label="Duyệt đơn"
                       onClick={() => {
-                        void handleViewDetail(row.id);
+                        void handleApprove(row.id);
                       }}
                       className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-700 transition hover:bg-blue-100"
                     >
-                      <EyeIcon className="size-4" />
+                      <CheckLineIcon className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Từ chối đơn"
+                      aria-label="Từ chối đơn"
+                      onClick={() => {
+                        void handleReject(row.id);
+                      }}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100"
+                    >
+                      <CloseIcon className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      title="Chỉnh sửa"
+                      aria-label="Chỉnh sửa"
+                      onClick={() => {
+                        void handleEditClick(row.id);
+                      }}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-700 transition hover:bg-blue-100"
+                    >
+                      <PencilIcon className="size-4" />
                     </button>
                     <button
                       type="button"
@@ -168,6 +249,19 @@ function LeaveRequestTables() {
           />
         </ComponentCard>
       </div>
+      <Modal
+        isOpen={isOpen}
+        onClose={handleCloseModal}
+        className="max-w-2xl m-4" // Set độ rộng tổng
+      >
+        <div className="relative w-full rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-8">
+          {/* Render Form vào đây */}
+          <LeaveRequestForm
+            onSuccess={handleCloseModal}
+            onCancel={handleCloseModal}
+          />
+        </div>
+      </Modal>
     </>
   );
 }

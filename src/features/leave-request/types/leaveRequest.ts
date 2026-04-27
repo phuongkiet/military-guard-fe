@@ -10,7 +10,7 @@ export type LeaveRequest = {
 
 export type LeaveRequestResponse = LeaveRequest;
 
-export type LeaveStatus = "pending" | "approved" | "rejected";
+export type LeaveStatus = 0 | 1 | 2;
 
 export type LeaveRequestCreateDTO = {
   militiaId: string;
@@ -23,7 +23,7 @@ export type LeaveRequestUpdateDTO = Partial<LeaveRequestCreateDTO>;
 
 export type ProcessLeaveRequestCommand = {
   leaveRequestId: string;
-  newStatus: Exclude<LeaveStatus, "pending">;
+  newStatus: Exclude<LeaveStatus, 0>;
 };
 
 export type GetPagedLeaveRequestsQuery = {

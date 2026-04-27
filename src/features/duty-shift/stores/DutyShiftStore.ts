@@ -20,9 +20,117 @@ export class DutyShiftStore {
   isLoading: boolean = false;
   error: string | null = null;
   selectedDutyShift: DutyShift | null = null;
+  currentTime: Date = new Date();
+  timerId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  private parseShiftTimeToTimestamp(timeValue: string): number {
+    const hhmmMatch = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(timeValue?.trim() ?? "");
+    if (hhmmMatch) {
+      const hours = Number(hhmmMatch[1]);
+      const minutes = Number(hhmmMatch[2]);
+      const seconds = hhmmMatch[3] ? Number(hhmmMatch[3]) : 0;
+
+      if (
+        hours >= 0 &&
+        hours <= 23 &&
+        minutes >= 0 &&
+        minutes <= 59 &&
+        seconds >= 0 &&
+        seconds <= 59
+      ) {
+        const date = new Date(this.currentTime);
+        date.setMilliseconds(0);
+        date.setHours(hours, minutes, seconds, 0);
+        return date.getTime();
+      }
+    }
+
+    return new Date(timeValue).getTime();
+  }
+
+  private getShiftRange(
+    shift: DutyShift,
+  ): { start: number; end: number; isOvernight: boolean } | null {
+    const start = this.parseShiftTimeToTimestamp(shift.startTime);
+    const end = this.parseShiftTimeToTimestamp(shift.endTime);
+
+    if (Number.isNaN(start) || Number.isNaN(end)) {
+      return null;
+    }
+
+    // Nếu ca qua đêm (ví dụ 22:00 -> 06:00), cộng thêm 1 ngày cho end.
+    if (end < start) {
+      return { start, end: end + 24 * 60 * 60 * 1000, isOvernight: true };
+    }
+
+    return { start, end, isOvernight: false };
+  }
+
+  startTimeSync = () => {
+    // Tránh mở nhiều interval cùng lúc
+    if (this.timerId) clearInterval(this.timerId); 
+    
+    // Cập nhật mỗi giây để bắt đúng thời điểm chuyển ca cho màn hình live.
+    this.timerId = setInterval(() => {
+      runInAction(() => {
+        this.currentTime = new Date();
+      });
+    }, 1000); 
+  };
+
+  // Hàm dọn dẹp khi user đăng xuất
+  stopTimeSync = () => {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
+  };
+
+  // 3. SENIOR CODE: Computed Property tự động nội suy ca hiện tại
+  // MobX sẽ tự động chạy lại hàm này mỗi khi this.currentTime hoặc this.list thay đổi
+  get currentActiveShift() {
+    if (!this.list || this.list.length === 0) return null;
+
+    return this.list.find((shift) => {
+      const range = this.getShiftRange(shift);
+      if (!range) return false;
+
+      let now = this.currentTime.getTime();
+      let { start, end, isOvernight } = range;
+
+      // Đồng bộ mốc now với ca qua đêm khi đã qua 00:00.
+      if (isOvernight && now < start) {
+        now += 24 * 60 * 60 * 1000;
+      }
+
+      // Nới lỏng logic: Cho phép điểm danh trước 15 phút (900000 ms) khi ca bắt đầu
+      const allowedCheckInTime = start - 900000; 
+
+      return now >= allowedCheckInTime && now <= end;
+    });
+  }
+
+  // Chỉ dùng cho màn hình live: ca đã bắt đầu thực tế (không nới 15 phút).
+  get currentLiveShift() {
+    if (!this.list || this.list.length === 0) return null;
+
+    return this.list.find((shift) => {
+      const range = this.getShiftRange(shift);
+      if (!range) return false;
+
+      let now = this.currentTime.getTime();
+      let { start, end, isOvernight } = range;
+
+      if (isOvernight && now < start) {
+        now += 24 * 60 * 60 * 1000;
+      }
+
+      return now >= start && now <= end;
+    });
   }
 
   selectDutyShift = (id: string) => {
