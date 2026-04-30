@@ -62,31 +62,15 @@ const MilitiaSidebar: React.FC = () => {
           !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
         }`}
       >
-        <Link to="/militia">
+        <Link to="/militia" className="flex items-center gap-2">
           {isExpanded || isHovered || isMobileOpen ? (
-            <>
-              <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">
+              Military Guard
+            </span>
           ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500 text-white font-bold text-sm">
+              M
+            </span>
           )}
         </Link>
       </div>

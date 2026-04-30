@@ -3,8 +3,27 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { useStore } from "../../../stores/RootStore";
 import ComponentCard from "../../../components/common/ComponentCard";
-import { displayDate } from "../../../utils/timeFormat";
 import Button from "../../../components/ui/button/Button";
+
+const formatShiftTimeForWidget = (value?: string | null): string => {
+  if (!value) return "--:--";
+
+  const trimmedValue = value.trim();
+  if (/^\d{1,2}:\d{2}(?::\d{2})?$/.test(trimmedValue)) {
+    return trimmedValue.slice(0, 5);
+  }
+
+  const parsedDate = new Date(trimmedValue);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "--:--";
+  }
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(parsedDate);
+};
 
 const CurrentShiftWidget: React.FC = () => {
   const { dutyShiftStore, authStore } = useStore();
@@ -19,35 +38,34 @@ const CurrentShiftWidget: React.FC = () => {
     return () => dutyShiftStore.stopTimeSync();
   }, [dutyShiftStore]);
 
+  const displayShift = dutyShiftStore.currentDisplayShift;
   const activeShift = dutyShiftStore.currentActiveShift;
   const liveShift = dutyShiftStore.currentLiveShift;
   const canAccessAttendanceLive =
     authStore.user?.role === "Admin" || authStore.user?.role === "Commander";
 
-  if (!activeShift) {
-    return (
-      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 text-center">
-        <p className="text-gray-500 dark:text-gray-400">Hiện tại không có ca trực nào đang diễn ra hoặc sắp bắt đầu.</p>
-      </div>
-    );
-  }
+  if (!displayShift) return null;
 
   return (
     <ComponentCard title="Truy cập nhanh: Ca trực hiện tại">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-2">
         <div>
           <h5 className="text-lg font-bold text-gray-800 dark:text-white">
-            {activeShift.shiftOrder === 1 ? "Ca sáng" : activeShift.shiftOrder === 2 ? "Ca chiều" : `Ca ${activeShift.shiftOrder}`}
+            {displayShift.shiftOrder === 1 ? "Ca sáng" : displayShift.shiftOrder === 2 ? "Ca chiều" : `Ca ${displayShift.shiftOrder}`}
           </h5>
           <p className="text-sm text-gray-500">
-            Thời gian: {displayDate(activeShift.startTime, true)} - {displayDate(activeShift.endTime, true)}
+            Thời gian: {formatShiftTimeForWidget(displayShift.startTime)} - {formatShiftTimeForWidget(displayShift.endTime)}
           </p>
         </div>
         
         <div className="flex gap-3 w-full md:w-auto">
           <Button 
             variant="outline" 
-            onClick={() => navigate(`/attendance-live/${activeShift.id}`)}
+            disabled={!activeShift}
+            onClick={() => {
+              if (!activeShift) return;
+              navigate(`/attendance-live/${activeShift.id}`);
+            }}
           >
             Điểm danh đầu ca
           </Button>

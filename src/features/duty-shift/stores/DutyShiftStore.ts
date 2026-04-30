@@ -70,6 +70,21 @@ export class DutyShiftStore {
     return { start, end, isOvernight: false };
   }
 
+  private normalizeNowForRange(range: {
+    start: number;
+    end: number;
+    isOvernight: boolean;
+  }): number {
+    let now = this.currentTime.getTime();
+
+    // Đồng bộ mốc now với ca qua đêm khi đã qua 00:00.
+    if (range.isOvernight && now < range.start) {
+      now += 24 * 60 * 60 * 1000;
+    }
+
+    return now;
+  }
+
   startTimeSync = () => {
     // Tránh mở nhiều interval cùng lúc
     if (this.timerId) clearInterval(this.timerId); 
@@ -99,13 +114,8 @@ export class DutyShiftStore {
       const range = this.getShiftRange(shift);
       if (!range) return false;
 
-      let now = this.currentTime.getTime();
-      let { start, end, isOvernight } = range;
-
-      // Đồng bộ mốc now với ca qua đêm khi đã qua 00:00.
-      if (isOvernight && now < start) {
-        now += 24 * 60 * 60 * 1000;
-      }
+      const now = this.normalizeNowForRange(range);
+      const { start, end } = range;
 
       // Nới lỏng logic: Cho phép điểm danh trước 15 phút (900000 ms) khi ca bắt đầu
       const allowedCheckInTime = start - 900000; 
@@ -122,14 +132,27 @@ export class DutyShiftStore {
       const range = this.getShiftRange(shift);
       if (!range) return false;
 
-      let now = this.currentTime.getTime();
-      let { start, end, isOvernight } = range;
-
-      if (isOvernight && now < start) {
-        now += 24 * 60 * 60 * 1000;
-      }
+      const now = this.normalizeNowForRange(range);
+      const { start, end } = range;
 
       return now >= start && now <= end;
+    });
+  }
+
+  // Dùng cho widget: tiếp tục hiển thị tối đa 10 phút sau khi ca kết thúc.
+  get currentDisplayShift() {
+    if (!this.list || this.list.length === 0) return null;
+
+    return this.list.find((shift) => {
+      const range = this.getShiftRange(shift);
+      if (!range) return false;
+
+      const now = this.normalizeNowForRange(range);
+      const { start, end } = range;
+      const visibleFrom = start - 900000;
+      const visibleUntil = end + 600000;
+
+      return now >= visibleFrom && now <= visibleUntil;
     });
   }
 

@@ -30,7 +30,7 @@ function MilitiaHome() {
       <PageBreadcrumb pageTitle="Khu vực dân quân" homePath="/militia" />
 
       <div className="space-y-6">
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-8 text-white shadow-sm dark:border-white/5">
+        {/* <div className="overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 px-6 py-8 text-white shadow-sm dark:border-white/5">
           <div className="max-w-3xl space-y-3">
             <p className="text-sm uppercase tracking-[0.2em] text-cyan-200/80">
               Cổng dành riêng cho dân quân
@@ -39,7 +39,7 @@ function MilitiaHome() {
               Xin chào, {authStore.user?.username ?? "bạn"}
             </h1>
           </div>
-        </div>
+        </div> */}
 
         <ComponentCard title="Lối tắt thao tác" desc="Đi thẳng tới nghiệp vụ bạn cần xử lý.">
           <div className="grid gap-4 md:grid-cols-2">

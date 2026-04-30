@@ -102,7 +102,6 @@ function MilitiaAssignments() {
       <div className="space-y-6">
         <ComponentCard
           title="Danh sách ca được phân công"
-          desc="Chỉ hiển thị dữ liệu của militiaId đang đăng nhập. Bạn có thể điểm danh trực tiếp trên từng dòng ca trực."
         >
           {!militiaId ? (
             <div className="rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
