@@ -21,6 +21,23 @@ export type ShiftAssignmentCreateDTO = {
   isLeader: boolean;
 };
 
+export type AvailableMilitiaDto = {
+  militiaId: string;
+  fullName: string;
+  militiaRank: string;
+  isStandby?: boolean;
+};
+
+export type SubstituteMilitiaDto = {
+  absentAssignmentId: string;
+  substituteMilitiaId: string;
+};
+
+export type SubstituteResponse = {
+  message: string;
+  assignmentId: string; 
+};
+
 export type ShiftAssignmentUpdateCommand = {
   id: string;
   isLeader: boolean;

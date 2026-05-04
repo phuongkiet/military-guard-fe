@@ -11,6 +11,7 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from "@microsoft/signalr";
+import { shiftAssignmentService } from "../../shift-assignment/services/shiftAssignmentService";
 
 const normalizeStatus = (
   value: AttendanceStatus | keyof typeof AttendanceStatus | number | string,
@@ -48,6 +49,7 @@ export class AttendanceStore {
   recentCheckIns: IAttendance[] = [];
   hubConnection: HubConnection | null = null;
   liveAttendances: IAttendance[] = [];
+  isSubstituting = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -164,4 +166,25 @@ export class AttendanceStore {
     this.error = null;
     this.successMessage = null;
   }
+
+  executeSubstitution = async (absentId: string, substituteId: string) => {
+    this.isSubstituting = true;
+    try {
+      const response = await shiftAssignmentService.substitute({
+        absentAssignmentId: absentId,
+        substituteMilitiaId: substituteId,
+      });
+      
+      // Thành công -> Bắn Toast báo cho user biết
+      window.alert(response.message || "Điều động thành công!");
+
+    } catch (error: any) {
+      // Thất bại -> Bắn Toast báo lỗi (VD: Bị chửi do trùng ca, lỗi DB...)
+      window.alert(error.response?.data?.title || "Lỗi khi điều động thay thế");
+    } finally {
+      runInAction(() => {
+        this.isSubstituting = false;
+      });
+    }
+  };
 }

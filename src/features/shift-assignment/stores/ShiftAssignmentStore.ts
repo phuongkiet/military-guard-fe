@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { shiftAssignmentService } from "../services/shiftAssignmentService";
 import type {
+  AvailableMilitiaDto,
   GetAllShiftAssignmentsQuery,
   ShiftAssignment,
   ShiftAssignmentCreateDTO,
@@ -19,10 +20,31 @@ export class ShiftAssignmentStore {
   hasNextPage: boolean = false;
   isLoading: boolean = false;
   error: string | null = null;
+  availableSubstitutes: AvailableMilitiaDto[] = [];
+  isLoadingSubstitutes = false;
+  isSubstituting = false;
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
   }
+
+  loadAvailableSubstitutes = async (absentAssignmentId: string) => {
+    this.isLoadingSubstitutes = true;
+    this.availableSubstitutes = []; // Reset list cũ
+    try {
+      // Nhớ viết thêm method getAvailableSubstitutes trong service nhé
+      const data = await shiftAssignmentService.getAvailableSubstitutes(absentAssignmentId);
+      runInAction(() => {
+        this.availableSubstitutes = data;
+      });
+    } catch (error) {
+      window.alert("Không thể tải danh sách quân chi viện");
+    } finally {
+      runInAction(() => {
+        this.isLoadingSubstitutes = false;
+      });
+    }
+  };
 
   async fetchList(query?: GetAllShiftAssignmentsQuery) {
     this.isLoading = true;
@@ -156,4 +178,32 @@ export class ShiftAssignmentStore {
   resetDetail() {
     this.detail = null;
   }
+
+  executeSubstitution = async (absentAssignmentId: string, substituteId: string) => {
+    this.isLoading = true;
+    this.error = null;
+    try {
+      const response = await shiftAssignmentService.substitute({
+        absentAssignmentId: absentAssignmentId,
+        substituteMilitiaId: substituteId,
+      });
+      
+      // Thành công -> Reset data
+      runInAction(() => {
+        this.availableSubstitutes = [];
+      });
+      
+      return response;
+    } catch (error: any) {
+      const apiError = error as ApiError;
+      runInAction(() => {
+        this.error = apiError.message || "Lỗi khi điều động thay thế";
+      });
+      throw error;
+    } finally {
+      runInAction(() => {
+        this.isLoading = false;
+      });
+    }
+  };
 }

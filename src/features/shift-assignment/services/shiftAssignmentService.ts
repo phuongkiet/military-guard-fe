@@ -1,11 +1,14 @@
 import { requests } from "../../../api/agent";
 import type { PaginatedList } from "../../../types/common";
 import type {
+  AvailableMilitiaDto,
   GetAllShiftAssignmentsQuery,
   ShiftAssignmentCreateDTO,
   ShiftAssignmentResponse,
   ShiftAssignmentUpdateCommand,
   ShiftAssignmentUpdateDTO,
+  SubstituteMilitiaDto,
+  SubstituteResponse,
 } from "../types/shiftAssignment";
 
 const endpoints = {
@@ -14,6 +17,8 @@ const endpoints = {
   create: "/ShiftAssignments",
   update: (id: string) => `/ShiftAssignments/${id}`,
   delete: (id: string) => `/ShiftAssignments/${id}`,
+  substitute: "/ShiftAssignments/substitute",
+  availableSubstitutes: (assignmentId: string) => `/ShiftAssignments/${assignmentId}/available-substitutes`,
 };
 
 export const shiftAssignmentService = {
@@ -26,9 +31,13 @@ export const shiftAssignmentService = {
       const pageSize = query?.pageSize ?? 5;
       const requestedPageIndex = query?.pageIndex ?? 1;
       const totalPages = pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
-      const pageIndex = totalPages > 0 ? Math.min(Math.max(1, requestedPageIndex), totalPages) : 1;
+      const pageIndex =
+        totalPages > 0
+          ? Math.min(Math.max(1, requestedPageIndex), totalPages)
+          : 1;
       const start = (pageIndex - 1) * pageSize;
-      const pagedItems = pageSize > 0 ? items.slice(start, start + pageSize) : items;
+      const pagedItems =
+        pageSize > 0 ? items.slice(start, start + pageSize) : items;
 
       return {
         items: pagedItems,
@@ -56,7 +65,8 @@ export const shiftAssignmentService = {
     const pageSize = payload.pageSize ?? query?.pageSize ?? 10;
     const totalCount = payload.totalCount ?? items.length;
     const totalPages =
-      payload.totalPages ?? (pageSize > 0 ? Math.ceil(totalCount / pageSize) : 1);
+      payload.totalPages ??
+      (pageSize > 0 ? Math.ceil(totalCount / pageSize) : 1);
     const hasPreviousPage = payload.hasPreviousPage ?? pageIndex > 1;
     const hasNextPage = payload.hasNextPage ?? pageIndex < totalPages;
 
@@ -70,13 +80,18 @@ export const shiftAssignmentService = {
       hasNextPage,
     } satisfies PaginatedList<ShiftAssignmentResponse>;
   },
-  detail: (id: string) => requests.get<ShiftAssignmentResponse>(endpoints.detail(id)),
+  detail: (id: string) =>
+    requests.get<ShiftAssignmentResponse>(endpoints.detail(id)),
   create: (payload: ShiftAssignmentCreateDTO) =>
     requests.post<string>(endpoints.create, payload),
   update: (id: string, payload: ShiftAssignmentUpdateDTO) =>
-    requests.put<void>(
-      endpoints.update(id),
-      { id, ...payload } satisfies ShiftAssignmentUpdateCommand,
-    ),
+    requests.put<void>(endpoints.update(id), {
+      id,
+      ...payload,
+    } satisfies ShiftAssignmentUpdateCommand),
   delete: (id: string) => requests.delete<void>(endpoints.delete(id)),
+  substitute: (payload: SubstituteMilitiaDto) =>
+    requests.post<SubstituteResponse>(endpoints.substitute, payload),
+  getAvailableSubstitutes: (assignmentId: string) =>
+    requests.get<AvailableMilitiaDto[]>(endpoints.availableSubstitutes(assignmentId)),
 };

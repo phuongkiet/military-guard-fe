@@ -6,12 +6,16 @@ import PageBreadCrumb from "../../components/common/PageBreadCrumb";
 import ComponentCard from "../../components/common/ComponentCard";
 import Badge from "../../components/ui/badge/Badge";
 import { useStore } from "../../stores/RootStore"; // Giả sử em dùng hook này để lấy RootStore
+import { useModal } from "../../hooks/useModal";
+import SubstituteModal from "../../features/shift-assignment/components/SubstituteModal";
 import { AttendanceStatus } from "../../features/attendance/types/attendance"; // Định nghĩa enum trạng thái điểm danh
 import { CheckLineIcon, CloseLineIcon, TimeIcon } from "../../assets/icons"; // Sử dụng các icon em đã có
 
 const AttendanceLiveDashboard: React.FC = () => {
   const { shiftId } = useParams<{ shiftId: string }>();
   const { attendanceStore } = useStore();
+  const { isOpen, openModal, closeModal } = useModal(false);
+  const [absentAssignmentId, setAbsentAssignmentId] = React.useState<string | null>(null);
   const { liveAttendances, isLoading } = attendanceStore;
 
   useEffect(() => {
@@ -107,13 +111,14 @@ const AttendanceLiveDashboard: React.FC = () => {
                   <th className="px-6 py-3">Thời gian báo cáo</th>
                   <th className="px-6 py-3">Trạng thái</th>
                   <th className="px-6 py-3">Ghi chú</th>
+                  <th className="px-6 py-3">Hành động</th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {isLoading ? (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-6 py-10 text-center text-gray-500"
                     >
                       Đang tải dữ liệu ca trực...
@@ -151,7 +156,7 @@ const AttendanceLiveDashboard: React.FC = () => {
                         {attendance.note && attendance.note.length > 70 ? (
                           <span
                             title={attendance.note}
-                            className="cursor-help border-b border-dotted border-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                            className="cursor-help border-b border-dotted border-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors truncate"
                           >
                             {attendance.note.slice(0, 70)}...
                           </span>
@@ -159,6 +164,21 @@ const AttendanceLiveDashboard: React.FC = () => {
                           <span>{attendance.note || "Không có"}</span>
                         )}
                       </td>
+                      {attendance.status !== AttendanceStatus.OnTime && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => {
+                              // Prefer using an assignment id if available. Fallback to shiftId+militiaId composite.
+                              const candidateId = (attendance as any).assignmentId || `${attendance.shiftId}::${attendance.militiaId}`;
+                              setAbsentAssignmentId(String(candidateId));
+                              openModal();
+                            }}
+                            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
+                          >
+                            Điều động
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -166,9 +186,18 @@ const AttendanceLiveDashboard: React.FC = () => {
             </table>
           </div>
         </ComponentCard>
+        <SubstituteModal
+          isOpen={isOpen}
+          onClose={() => {
+            closeModal();
+            setAbsentAssignmentId(null);
+          }}
+          absentAssignmentId={absentAssignmentId}
+        />
       </div>
     </>
   );
 };
 
 export default observer(AttendanceLiveDashboard);
+

@@ -25,6 +25,7 @@ export type CheckInApiResponse = {
 };
 
 export interface IAttendance {
+    assignmentId: string;
     militiaId: string;
     shiftId: string;
     guardPostId?: string;
